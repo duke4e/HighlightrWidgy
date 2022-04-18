@@ -3,18 +3,18 @@
 import PackageDescription
 
 let package = Package(
-    name: "HighlightrWidgy",
+    name: "Highlightr",
     platforms: [
-        .macOS(.v12_0),
+        .macOS(.v12),
         .iOS(.v14),
     ],
     products: [
-        .library(name: "HighlightrWidgy", targets: ["HighlightrWidgy"])
+        .library(name: "Highlightr", targets: ["Highlightr"])
     ],
     dependencies: [],
     targets: [
         .target(
-            name: "HighlightrWidgy",
+            name: "Highlightr",
             dependencies: [],
             path: "Sources",
             exclude: [],
