@@ -6,13 +6,7 @@
 //
 //
 
-import Foundation
-
-#if os(OSX)
-    import AppKit
-#elseif os(iOS)
-    import UIKit
-#endif
+import UIKit
 
 /// Highlighting Delegate
 @objc public protocol HighlightDelegate
@@ -75,16 +69,6 @@ open class CodeAttributedString : NSTextStorage
         setupListeners()
     }
     
-    #if os(OSX)
-    /// Initialize the CodeAttributedString
-    required public init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType)
-    {
-        self.highlightr = Highlightr()!
-        super.init(pasteboardPropertyList: propertyList, ofType: type)
-        setupListeners()
-    }
-    #endif
-    
     /// Language syntax to use for highlighting. Providing nil will disable highlighting.
     open var language : String?
     {
@@ -111,7 +95,7 @@ open class CodeAttributedString : NSTextStorage
      
      - returns: Attributes
      */
-    open override func attributes(at location: Int, effectiveRange range: NSRangePointer?) -> [AttributedStringKey : Any]
+    open override func attributes(at location: Int, effectiveRange range: NSRangePointer?) -> [NSAttributedString.Key : Any]
     {
         return stringStorage.attributes(at: location, effectiveRange: range)
     }
@@ -125,7 +109,7 @@ open class CodeAttributedString : NSTextStorage
     open override func replaceCharacters(in range: NSRange, with str: String)
     {
         stringStorage.replaceCharacters(in: range, with: str)
-        self.edited(TextStorageEditActions.editedCharacters, range: range, changeInLength: (str as NSString).length - range.length)
+        self.edited(NSTextStorage.EditActions.editedCharacters, range: range, changeInLength: (str as NSString).length - range.length)
     }
     
     /**
@@ -134,10 +118,10 @@ open class CodeAttributedString : NSTextStorage
      - parameter attrs: [String : AnyObject]
      - parameter range: NSRange
      */
-    open override func setAttributes(_ attrs: [AttributedStringKey : Any]?, range: NSRange)
+    open override func setAttributes(_ attrs: [NSAttributedString.Key : Any]?, range: NSRange)
     {
         stringStorage.setAttributes(attrs, range: range)
-        self.edited(TextStorageEditActions.editedAttributes, range: range, changeInLength: 0)
+        self.edited(NSTextStorage.EditActions.editedAttributes, range: range, changeInLength: 0)
     }
     
     /// Called internally everytime the string is modified.
@@ -198,7 +182,7 @@ open class CodeAttributedString : NSTextStorage
                     self.stringStorage.setAttributes(attrs, range: fixedRange)
                 })
                 self.endEditing()
-                self.edited(TextStorageEditActions.editedAttributes, range: range, changeInLength: 0)
+                self.edited(NSTextStorage.EditActions.editedAttributes, range: range, changeInLength: 0)
                 self.highlightDelegate?.didHighlight?(range, success: true)
             })
             

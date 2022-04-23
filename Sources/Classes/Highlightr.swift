@@ -9,10 +9,6 @@
 import Foundation
 import JavaScriptCore
 
-#if os(OSX)
-    import AppKit
-#endif
-
 /// Utility class for generating a highlighted NSAttributedString from a String.
 open class Highlightr
 {
@@ -70,13 +66,14 @@ open class Highlightr
         {
             return nil
         }
+        
         guard let hljs = window?.objectForKeyedSubscript("hljs") else
         {
             return nil
         }
         self.hljs = hljs
         
-        guard setTheme(to: "pojoaque") else
+        guard setTheme(to: "default") else
         {
             return nil
         }
@@ -113,7 +110,7 @@ open class Highlightr
      
      - returns: NSAttributedString with the detected code highlighted.
      */
-    open func highlight(_ code: String, as languageName: String? = nil, fastRender: Bool = true) -> NSAttributedString?
+    open func highlight(_ code: String, as languageName: String? = nil) -> NSAttributedString?
     {
         let ret: JSValue
         if let languageName = languageName
@@ -131,26 +128,7 @@ open class Highlightr
             return nil
         }
         
-        var returnString : NSAttributedString?
-        if(fastRender)
-        {
-            returnString = processHTMLString(string)!
-        }else
-        {
-            string = "<style>"+theme.lightTheme+"</style><pre><code class=\"hljs\">"+string+"</code></pre>"
-            let opt: [NSAttributedString.DocumentReadingOptionKey : Any] = [
-             .documentType: NSAttributedString.DocumentType.html,
-             .characterEncoding: String.Encoding.utf8.rawValue
-             ]
-            
-            let data = string.data(using: String.Encoding.utf8)!
-            safeMainSync
-            {
-                returnString = try? NSMutableAttributedString(data:data, options: opt, documentAttributes:nil)
-            }
-        }
-        
-        return returnString
+        return processHTMLString(string)
     }
     
     /**
@@ -178,20 +156,6 @@ open class Highlightr
     {
         let res = hljs.invokeMethod("listLanguages", withArguments: [])
         return res!.toArray() as! [String]
-    }
-    
-    /**
-     Execute the provided block in the main thread synchronously.
-     */
-    private func safeMainSync(_ block: @escaping ()->())
-    {
-        if Thread.isMainThread
-        {
-            block()
-        }else
-        {
-            DispatchQueue.main.sync { block() }
-        }
     }
     
     private func processHTMLString(_ string: String) -> NSAttributedString?
