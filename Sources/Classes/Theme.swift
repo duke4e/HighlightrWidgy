@@ -24,6 +24,7 @@ open class Theme {
     
     private var themeDict : RPThemeDict!
     private var strippedTheme : RPThemeStringDict!
+    open var themeBackgroundColor : UIColor!
 
     /**
      Initialize the theme with the given theme name.
@@ -64,6 +65,25 @@ open class Theme {
         } while hasErrors && retries < 20000
         strippedTheme = tmpStrippedTheme
         
+        var bkgColorHex = strippedTheme[".hljs"]?["background"]
+        if bkgColorHex == nil {
+            bkgColorHex = strippedTheme[".hljs"]?["background-color"]
+        }
+
+        if let bkgColorHex = bkgColorHex {
+            if bkgColorHex == "white" {
+                themeBackgroundColor = .white
+            } else if bkgColorHex == "black" {
+                themeBackgroundColor = .black
+            } else {
+                let range = bkgColorHex.range(of: "#")
+                let str = String(bkgColorHex[(range?.lowerBound)!...])
+                themeBackgroundColor = colorWithHexString(str)
+            }
+        } else {
+            themeBackgroundColor = .systemBackground
+        }
+
         themeDict = strippedThemeToTheme(strippedTheme)
     }
     
