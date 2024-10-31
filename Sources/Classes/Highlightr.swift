@@ -90,12 +90,7 @@ open class Highlightr
     @discardableResult
     open func setTheme(to name: String) -> Bool
     {
-        print(1)
-        guard let defTheme = bundle.url(forResource: name, withExtension: "json") else { return false }
-        print(2)
-
-        if let data = try? Data(contentsOf: defTheme), let dict = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: [String: String]] {
-            print(3)
+        if let defTheme = bundle.url(forResource: name, withExtension: "json"), let data = try? Data(contentsOf: defTheme), let dict = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: [String: String]] {
             theme = Theme(tmpStrippedTheme: dict)
             return true
         }
