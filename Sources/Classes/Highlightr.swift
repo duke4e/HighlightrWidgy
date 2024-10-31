@@ -27,7 +27,7 @@ open class Highlightr
     /// Defaults to `false` - when `true`, forces highlighting to finish even if illegal syntax is detected.
     open var ignoreIllegals = false
 
-    private let hljs: JSValue
+    private let hljs: JavaScriptCore.JSValue
 
     private let bundle : Bundle
     private let htmlStart = "<"
@@ -90,15 +90,17 @@ open class Highlightr
     @discardableResult
     open func setTheme(to name: String) -> Bool
     {
-        guard let defTheme = bundle.path(forResource: name+".min", ofType: "css") else
-        {
-            return false
-        }
-        let themeString = try! String.init(contentsOfFile: defTheme)
-        theme =  Theme(themeString: themeString)
+        print(1)
+        guard let defTheme = bundle.url(forResource: name, withExtension: "json") else { return false }
+        print(2)
 
-        
-        return true
+        if let data = try? Data(contentsOf: defTheme), let dict = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: [String: String]] {
+            print(3)
+            theme = Theme(tmpStrippedTheme: dict)
+            return true
+        }
+
+        return false
     }
     
     /**
@@ -112,7 +114,7 @@ open class Highlightr
      */
     open func highlight(_ code: String, as languageName: String? = nil) -> NSAttributedString?
     {
-        let ret: JSValue
+        let ret: JavaScriptCore.JSValue
         if let languageName = languageName
         {
             ret = hljs.invokeMethod("highlight", withArguments: [languageName, code, ignoreIllegals])
@@ -130,23 +132,7 @@ open class Highlightr
         
         return processHTMLString(string)
     }
-    
-    /**
-     Returns a list of all the available themes.
-     
-     - returns: Array of Strings
-     */
-    open func availableThemes() -> [String]
-    {
-        let paths = bundle.paths(forResourcesOfType: "css", inDirectory: nil) as [NSString]
-        var result = [String]()
-        for path in paths {
-            result.append(path.lastPathComponent.replacingOccurrences(of: ".min.css", with: ""))
-        }
-        
-        return result
-    }
-    
+
     /**
      Returns a list of all supported languages.
      

@@ -9,12 +9,10 @@
 import UIKit
 
 private typealias RPThemeDict = [String: [AnyHashable: AnyObject]]
-private typealias RPThemeStringDict = [String:[String:String]]
+private typealias RPThemeStringDict = [String: [String: String]]
 
 /// Theme parser, can be used to configure the theme parameters. 
 open class Theme {
-    internal let theme : String
-    
     /// Regular font to be used by this theme
     open var codeFont : UIFont!
     /// Bold font to be used by this theme
@@ -32,39 +30,13 @@ open class Theme {
      - parameter themeString: Theme to use.
      */
     
-    init(themeString: String)
+    init(tmpStrippedTheme: [String: [String: String]])
     {
-        theme = themeString
         themeDict = nil
         setCodeFont(UIFont.monospacedSystemFont(ofSize: 14, weight: .regular))
         
-        var tmpStrippedTheme = RPThemeStringDict()
-        var retries = 0
-        var hasErrors = false
-        strippedTheme = stripTheme(themeString)
-        repeat {
-            hasErrors = false
-            strippedTheme = stripTheme(themeString)
-            for (key, value) in strippedTheme {
-                var isGood = true
-                for (_, val) in value {
-                    if val == "highlight" {
-                        isGood = false
-                    }
-                }
-                
-                if isGood {
-                    tmpStrippedTheme[key] = value
-                }
-            }
-            
-            if tmpStrippedTheme.count != strippedTheme.count {
-                hasErrors = true
-                retries += 1
-            }
-        } while hasErrors && retries < 20000
         strippedTheme = tmpStrippedTheme
-        
+
         var bkgColorHex = strippedTheme[".hljs"]?["background"]
         if bkgColorHex == nil {
             bkgColorHex = strippedTheme[".hljs"]?["background-color"]
